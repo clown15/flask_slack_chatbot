@@ -1,11 +1,54 @@
 import os
-from flask import Flask
-from models import db
+from flask import Flask,render_template,redirect,session
+from models import db,User
 from api_v1 import api as api_v1
-
+from forms import SignupForm,SigninForm
+from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
 app.register_blueprint(api_v1,url_prefix='/api/v1')
+
+@app.route('/',methods=['GET'])
+def home():
+    userid = session.get('userid',None)
+    return render_template('home.html',userid=userid)
+
+@app.route('/signin',methods=['GET','POST'])
+def signin():
+    form = SigninForm()
+
+    if form.validate_on_submit():
+        session['userid'] = form.data.get('userid')
+
+        return redirect('/')
+    
+    return render_template('signin.html',form=form)
+
+@app.route('/signup',methods=['GET','POST'])
+def signup():
+    form = SignupForm()
+    if form.validate_on_submit():
+        user = User()
+        user.userid = form.data.get('userid')
+        user.password = form.data.get('password')
+
+        db.session.add(user)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+
+        return redirect('/signin')
+
+    return render_template('signup.html',form=form)
+
+@app.route('/signout',methods=['GET'])
+def signout():
+    session.pop('userid',None)
+    return redirect('/')
+
+
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 dbfile = os.path.join(basedir,'db.sqlite')
