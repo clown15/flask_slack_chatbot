@@ -1,6 +1,7 @@
 import os
 from flask import Flask,render_template,redirect,session
-from models import db,User
+from flask_migrate import Migrate
+from models import db,User,Todo
 from api_v1 import api as api_v1
 from forms import SignupForm,SigninForm
 from sqlalchemy.exc import IntegrityError
@@ -11,7 +12,8 @@ app.register_blueprint(api_v1,url_prefix='/api/v1')
 @app.route('/',methods=['GET'])
 def home():
     userid = session.get('userid',None)
-    return render_template('home.html',userid=userid)
+    todos = Todo.query.filter_by(user_id=userid).all()
+    return render_template('home.html',userid=userid,todos=todos)
 
 @app.route('/signin',methods=['GET','POST'])
 def signin():
@@ -19,7 +21,6 @@ def signin():
 
     if form.validate_on_submit():
         session['userid'] = form.data.get('userid')
-
         return redirect('/')
     
     return render_template('signin.html',form=form)
@@ -30,6 +31,7 @@ def signup():
     if form.validate_on_submit():
         user = User()
         user.userid = form.data.get('userid')
+        user.slack_name = form.data.get('slack_name')
         user.password = form.data.get('password')
 
         db.session.add(user)
@@ -37,6 +39,7 @@ def signup():
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
+            return redirect('/signup')
 
         return redirect('/signin')
 
@@ -68,6 +71,7 @@ app.config['SECRET_KEY'] = 'sdnajkfnwejknvjkfda'
 # db설정값 초기화
 db.init_app(app)
 db.app = app
+migrate = Migrate(app, db)
 # db 생성
 db.create_all()
 

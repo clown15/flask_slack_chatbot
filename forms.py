@@ -5,6 +5,7 @@ from wtforms.validators import DataRequired,EqualTo
 
 class SignupForm(FlaskForm):
     userid = StringField('userid',validators=[DataRequired()])
+    slack_name = StringField('slack_name')
     password = PasswordField('password',validators=[DataRequired(),EqualTo('re_password',message='입력한 비밀번호가 다릅니다.')])
     re_password = PasswordField('re_password',validators=[DataRequired()])
 

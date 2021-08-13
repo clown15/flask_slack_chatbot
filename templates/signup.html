@@ -24,10 +24,12 @@
                 <form method="POST" action="">
                     {{ form.csrf_token }}
                     <div class="form-group">
-                        <!-- <label for="id">사용자 이름</label>
-                        <input type="text" class="form-control" id="id" name="id" placeholder="아이디"> -->
                         {{ form.userid.label("아이디") }}
                         {{ form.userid(class="form-control",placeholder="아이디") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.slack_name.label("슬랙이름") }}
+                        {{ form.slack_name(class="form-control",placeholder="슬랙이름") }}
                     </div>
                     <div class="form-group">
                         {{ form.password.label("비밀번호") }}
@@ -37,7 +39,6 @@
                         {{ form.re_password.label("비밀번호 확인") }}
                         {{ form.re_password(class="form-control",placeholder="비밀번호 확인") }}
                     </div>
-                    <!-- <button type="button" class="btn btn-primary" onclick="regist()">회원가입</button> -->
                     <button type="submit" class="btn btn-primary">회원가입</button>
                 </form>
             </div>
